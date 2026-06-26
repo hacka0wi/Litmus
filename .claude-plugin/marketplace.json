@@ -1,21 +1,20 @@
 {
   "name": "saga",
   "owner": {
-    "name": "Saga (NEB-E2E)",
-    "email": "avalantclaudeai@gmail.com"
+    "name": "hacka0wi"
   },
   "metadata": {
-    "description": "Saga — NEB e-Budgeting tools for Claude Code: defect verification & DB workflows.",
+    "description": "Saga — Claude Code tools: live defect verification & DB workflows.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "litmus",
       "source": "./plugins/litmus",
-      "description": "Litmus — live-verify a NEB defect/fix end-to-end (Chrome MCP reproduce + fetch/XHR/scope/Oracle-relay instrument) before marking Ready to test. The definitive test that a fix is real.",
+      "description": "Litmus — live-verify a defect/fix end-to-end in the real app (browser-MCP reproduce + fetch/XHR/scope/DB instrument) before marking it done. The definitive test that a fix is real.",
       "version": "1.0.0",
       "category": "testing",
-      "keywords": ["verify", "live-test", "reproduce", "litmus", "neb", "chrome-mcp", "defect"]
+      "keywords": ["verify", "live-test", "reproduce", "litmus", "qa", "defect"]
     }
   ]
 }

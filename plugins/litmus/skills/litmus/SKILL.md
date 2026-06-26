@@ -1,82 +1,69 @@
 ---
 name: litmus
 description: >
-  Live-verify a NEB defect/fix end-to-end before marking it "Ready to test" — the mandatory
-  workflow (Rawi's rule): reproduce the ticket's test steps in the REAL UI via Chrome MCP as the
-  specified user, instrument the running app (network hook / Angular scope / DB relay), prove the
-  defect AND prove the fix, then update Plane. Use whenever about to verify/close a NEB-E2E ticket,
-  or when the user says "verify", "live test", "reproduce", "พิสูจน์", "เทสจริง", "ตรวจสอบ defect".
-  Backend curl / DB-only / "deployed so it's fixed" do NOT count as verification.
+  Litmus — live-verify a defect/fix end-to-end in the REAL app before you call it done. The mandatory
+  discipline: reproduce the ticket's exact test steps in the running UI as the reporting user, instrument
+  the live app (network hook / front-end scope / DB), prove the defect AND prove the fix, then update the
+  tracker. Use whenever about to verify or close a ticket, or when asked to "verify", "live test",
+  "reproduce", "prove it". Backend curl / unit-test / DB-only / "it deployed so it's fixed" do NOT count.
 ---
 
-# Live-verify a NEB defect (the verify-before-Ready discipline)
+# Litmus — the live test that a fix is real
 
-**Hard rule (Rawi):** never move a ticket to *Ready to test* on deploy/structural/DB evidence alone.
-Reproduce the ticket's **Test step** in the real UI as the **specified user**, see the defect, then
-see it gone after the fix. If you cannot reproduce (wrong user/access/data), say so and DO NOT mark Ready.
+**Hard rule:** never mark a ticket *done / ready-to-test* on deploy, unit-test, or DB-only evidence.
+Reproduce the ticket's **steps** in the real UI as the **specified user**, observe the defect, then
+observe it gone after the fix. If you can't reproduce (wrong user / no access / missing data), say so
+and DO NOT close it.
 
-## 0. Read the ticket first
-- Get the ticket's **User**, **Test step**, **Actual**, **Expected**, and the **Screen URL** (often embedded).
-- Plane API (same-origin fetch on `projects.oneweb.tech`): board `neb-e2e`, projectId
-  `68f36f0e-bffa-4cf7-a540-ca83e3060557`. Fetch issue by `?sequence_id=N`; description via the rendered
-  issue page (`/neb-e2e/browse/NEBE2-N/` + get_page_text) — the raw `description_html` is often redacted
-  by the MCP as `[BLOCKED: ...]` when it contains a URL/query string.
+> Environment specifics — app host, tracker API + ids, DB hosts, credentials, relay pods — belong in a
+> **private/local config** (e.g. agent memory or a `.env`), **never in this public skill**. The steps
+> below reference them as placeholders.
 
-## 1. Chrome MCP + login as the ticket's user
-- `tabs_context_mcp {createIfEmpty:true}` → navigate `https://uat-neb.bb.go.th/app`.
-- Switch user: avatar (top-right) → **เข้าด้วยบัญชีอื่น** → on the login page **fill the email only**,
-  then **clear the password and ask the user to type `P@ssw0rd` + click เข้าสู่ระบบ**. NEVER type/submit
-  the password yourself (prohibited). Wait for "เข้าให้แล้ว".
-- After login, **pick the NEB system** if prompted (avatar shows NEB/SUPPORT/etc.) — wrong system shows the
-  wrong menus. Confirm identity via `/app/api/userinfo` → `userInfo.{AGENCY_ID,MINISTRY_ID,USER_NAME}`.
-- **Access check:** if the ticket's user lacks the menu (e.g. search the sidebar finds nothing, or only
-  unrelated modules show), that's an access gap — comment on the ticket that the test user is wrong /
-  needs the menu granted, and DO NOT guess-fix. (I cannot modify permissions myself.)
+## 0. Read the ticket
+Pull the **user**, **test steps**, **actual**, **expected**, and the **screen URL**. If the tracker
+redacts/escapes the raw description, read the rendered issue page instead.
 
-## 2. Reproduce — follow the test steps exactly
-- Navigate the exact screen URL from the ticket (OneWeb apps are at `/neb-<app>/<SCREEN>?...`; or via the
-  portal menu, which embeds OneWeb in an **iframe** — access it via the iframe's `contentWindow`/`contentDocument`).
-- Click through the steps; screenshot the failing state. Confirm Actual == ticket.
+## 1. Open the app as the ticket's user
+- Drive the browser via an MCP browser tool; create/restore a tab.
+- Switch account through the app's own "sign in as another user" — **fill the email, then have the human
+  type the password and submit. Never type/submit a password yourself.**
+- Select the correct sub-system/tenant if the app has several (wrong one shows wrong menus).
+- Confirm identity from the app's `whoami`/`userinfo` endpoint.
+- **Access check:** if that user lacks the menu/screen, it's an access gap — note it on the ticket and
+  do NOT guess-fix. (Don't modify permissions yourself.)
+
+## 2. Reproduce — follow the steps exactly
+Navigate the exact screen; click through the steps; screenshot the failing state; confirm it matches the
+ticket's *actual*. If the app embeds modules in an **iframe**, reach them via the iframe's
+`contentWindow`/`contentDocument`.
 
 ## 3. Instrument the running app (pick what fits)
-- **Network hook — MUST hook BOTH fetch AND XHR.** `req_microflow` uses `fetch`, not XHR; an XHR-only hook
-  misses it. Filter on `/microflow\/service/` or `/neb-...-service/api/`. Capture request body + response.
-  Parse OneWeb payloads: `o.object → Object.values()[0].request` (a JSON string) → the real fields/ACTION.
-- **Angular scope** (OneWeb is AngularJS): find the list/data by walking `angular.element(el).scope()` for
-  the array (e.g. `dataList`); read raw rows to check dups/values without trusting the rendered page.
-- **Run the real deployed function with dialogs stubbed:** to exercise an exact code path when the UI flow
-  is blocked, override `window.alertModal` to auto-confirm (`if(type==='confirm') cb({isConfirmed:true})`),
-  call the page's real function (e.g. `publishWSS01_01_SC01_T01()`), and read the captured payload/result.
-  Verify the deployed JS actually contains the fix: `fn.toString().includes('...')`.
-- **Unique var names every call:** the javascript_tool shares a scope across calls — reusing `out`/`os`/`all`
-  throws "already declared". Suffix vars per call (`r57b`, `oSend60`, …).
+- **Network hook — hook BOTH `fetch` AND `XHR`.** Many SPA calls use `fetch`; an XHR-only hook misses
+  them. Capture request body + response; unwrap nested payloads to read the real fields/action.
+- **Front-end scope:** for AngularJS, walk `angular.element(el).scope()` to read the actual data array —
+  check counts/dups/values from state, don't trust the rendered (paginated) page.
+- **Exercise the real function with dialogs stubbed:** when the UI flow is blocked, override the confirm
+  dialog to auto-accept, call the page's real handler, and read the captured request/result. Verify the
+  deployed code actually contains the fix: `fn.toString().includes('...')`.
+- **Unique variable names per eval** — a shared eval scope throws "already declared" if you reuse names.
 
-## 4. DB verify (the source of truth) — UAT / SIT / PROD
-- Relays exist as pods (`kubectl --kubeconfig ~/.kube/<cfg> -n budget-bb port-forward pod/<relay> 152NN:1521`):
-  - UAT: `~/.kube/uat-dr-config`, pod `ora-relay` → 15212 (nebdb, APP / `P@ssw0rd`).
-  - PROD: `~/.kube/prod-config --insecure-skip-tls-verify`, pod `ora-relay-prod` → 15213 (SEPARATE DB).
-  - SIT: create a socat relay if none (canonical for procs).
-- Query with **python3.11 oracledb** (`connect(user,password,dsn="127.0.0.1:152NN/NEBDB",disable_oob=True)`;
-  `fetch_lobs=False` style). sqlplus 19 often hits ORA-12514 here; python works.
-- **Procs/functions: trust SIT `ALL_SOURCE` as canonical, not the repo `.sql`** (repo lags — Rawi edits the DB
-  first). Read the live source, compare UAT vs SIT.
-- **Always tear down**: `pkill -9 -f "kubectl.*port-forward"` when done.
+## 4. Verify in the database (source of truth)
+- Reach the DB through a relay (e.g. a `socat` pod + `kubectl port-forward`) and query with a real driver
+  (e.g. python `oracledb`, `disable_oob=True`); lightweight CLIs often fail where the driver works.
+- **Trust the live DB definition of procs/functions as canonical, not the repo `.sql`** if your team
+  edits the DB directly — read the live source and diff environments.
+- **Always tear the relay/port-forward down when done.**
 
-## 5. Prove the fix end-to-end, then mark Ready
-- Show: payload now carries the right value / list now de-duped / DB column now correct (e.g. re-query the
-  exact row). Capture the SUCCESS response AND the persisted DB state.
-- If you created/changed test data to verify, **revert it** (and back up before any destructive DB change:
-  `CREATE TABLE APP.BK<ticket>_... AS SELECT ...` so it's reversible; confirm rows are childless first).
-- Update Plane: POST `/api/workspaces/neb-e2e/projects/<proj>/issues/<id>/comments/` `{comment_html}` +
-  PATCH state. X-CSRFToken from `/auth/get-csrf-token/`. Ready-to-test state = `12bbf318-2526-4e1c-ad98-903e2123053b`.
-  Comment with the concrete evidence (captured payload, before/after counts, DB values).
+## 5. Prove the fix, then update the tracker
+- Show concrete before/after: payload now carries the right value / list now de-duped / the exact DB row
+  is now correct. Capture both the SUCCESS response AND the persisted state.
+- If you created or changed test data to verify, **revert it**; before any destructive DB change, **back
+  up first** (`CREATE TABLE <bk> AS SELECT ...`) and confirm the rows are safe (e.g. childless) to touch.
+- Comment on the ticket with the evidence (captured payload, before/after counts, DB values) and set the
+  status. Get a human's confirmation before destructive shared-data changes (blast radius).
 
-## Gotchas seen in the field
-- **Tab group resets** silently drop the Chrome session (re-login needed). Re-create with `createIfEmpty:true`.
-- **Chrome "not connected"** is usually transient — wait ~12s and retry the same call.
-- OneWeb search boxes sometimes don't filter on type — verify counts from the **scope**, not the rendered page.
-- Destructive shared-data changes (e.g. `M_WORKPLAN` is shared across BPN03/BPN10/…): VERIFY which is the
-  keeper before deleting, back up, and confirm with the user (re-confirm on blast radius).
-
-Related memory: `verify-defects-via-chrome-mcp-steps`, `speed-mode-no-skip-verify`, `db-procs-trust-sit-not-repo`,
-`db-function-fix-workflow`, `uat-oracle-db-access`, `portal-must-pick-neb-system-first`, `oneweb-callmicroflow-hang-pattern`.
+## Field gotchas
+- Browser tab groups can reset and silently drop the session — re-create and re-login.
+- "Browser not connected" is usually transient — wait ~10s and retry.
+- Search boxes that don't filter on type → verify counts from app state, not the rendered list.
+- Shared tables (one row used by many modules): identify the keeper, back up, and confirm before deleting.

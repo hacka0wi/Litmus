@@ -1,27 +1,24 @@
 # Saga — Claude Code plugin marketplace
 
-Team marketplace for the NEB e-Budgeting (NEB-E2E) project. Named after **Saga**, the agent persona
-that signs the Plane comments.
+A small marketplace of Claude Code tools for QA / live verification workflows.
 
 ## Plugins
 
 | Plugin | What it does |
 |---|---|
-| **litmus** | `/litmus` — the litmus test for a fix: live-verify a NEB defect/fix end-to-end (Chrome MCP reproduce as the ticket's user → instrument fetch+XHR / Angular scope / Oracle relay → prove defect & fix → update Plane). Enforces the verify-before-Ready discipline. |
+| **litmus** | `/litmus` — the litmus test for a fix: live-verify a defect/fix **end-to-end in the real app** (browser-MCP reproduce as the reporting user → instrument fetch+XHR / front-end scope / DB relay → prove defect **and** fix → update the tracker). Enforces "verify before you call it done" — backend curl / unit / "it deployed" do **not** count. |
 
 ## Install
 
 In any Claude Code session:
 
 ```
-/plugin marketplace add ~/Works/saga
+/plugin marketplace add https://github.com/hacka0wi/Litmus
 /plugin install litmus@saga
 ```
 
-(Or, if this repo is pushed to git: `/plugin marketplace add <git-url>`.)
-
-After install, the `/litmus` skill is available in **every project / session** and auto-triggers
-when you're about to verify or close a NEB-E2E ticket.
+After install, the `/litmus` skill is available in **every project / session** and auto-triggers when
+you're about to verify or close a ticket.
 
 ## Update
 
@@ -29,15 +26,18 @@ when you're about to verify or close a NEB-E2E ticket.
 /plugin marketplace update saga
 ```
 
-Bump `version` in `.claude-plugin/marketplace.json` and the plugin's `.claude-plugin/plugin.json` when you change a plugin.
+Bump `version` in `.claude-plugin/marketplace.json` and the plugin's `.claude-plugin/plugin.json` on changes.
 
 ## Structure
 
 ```
-saga/
+.
 ├── .claude-plugin/marketplace.json   # marketplace manifest (name: saga)
 └── plugins/
     └── litmus/
         ├── .claude-plugin/plugin.json  # plugin manifest (name: litmus)
-        └── skills/litmus/SKILL.md      # the /litmus skill
+        └── skills/litmus/SKILL.md      # the /litmus skill (generic, no secrets)
 ```
+
+> Environment-specific details (hosts, credentials, tracker ids, DB relays) are intentionally **not** in
+> this public skill — keep them in your own private config / agent memory.
