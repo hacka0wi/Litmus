@@ -1,4 +1,4 @@
-# Saga — Claude Code plugin marketplace
+# Litmus — Claude Code plugin marketplace
 
 A small marketplace of Claude Code tools for QA / live verification workflows.
 
@@ -14,7 +14,7 @@ In any Claude Code session:
 
 ```
 /plugin marketplace add https://github.com/hacka0wi/Litmus
-/plugin install litmus@saga
+/plugin install litmus@litmus
 ```
 
 After install, the `/litmus` skill is available in **every project / session** and auto-triggers when
@@ -23,7 +23,7 @@ you're about to verify or close a ticket.
 ## Update
 
 ```
-/plugin marketplace update saga
+/plugin marketplace update litmus
 ```
 
 Bump `version` in `.claude-plugin/marketplace.json` and the plugin's `.claude-plugin/plugin.json` on changes.
@@ -32,7 +32,7 @@ Bump `version` in `.claude-plugin/marketplace.json` and the plugin's `.claude-pl
 
 ```
 .
-├── .claude-plugin/marketplace.json   # marketplace manifest (name: saga)
+├── .claude-plugin/marketplace.json   # marketplace manifest (name: litmus)
 └── plugins/
     └── litmus/
         ├── .claude-plugin/plugin.json  # plugin manifest (name: litmus)

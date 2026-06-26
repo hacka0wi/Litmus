@@ -1,10 +1,10 @@
 {
-  "name": "saga",
+  "name": "litmus",
   "owner": {
     "name": "hacka0wi"
   },
   "metadata": {
-    "description": "Saga — Claude Code tools: live defect verification & DB workflows.",
+    "description": "Litmus — Claude Code tools: live defect verification & DB workflows.",
     "version": "1.0.0"
   },
   "plugins": [
