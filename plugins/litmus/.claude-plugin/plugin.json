@@ -5,5 +5,14 @@
   "author": {
     "name": "hacka0wi"
   },
-  "keywords": ["verify", "live-test", "reproduce", "litmus", "qa", "chrome-mcp", "defect"]
+  "keywords": [
+    "verify",
+    "live-test",
+    "reproduce",
+    "litmus",
+    "qa",
+    "chrome-mcp",
+    "defect"
+  ],
+  "license": "MIT"
 }

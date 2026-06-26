@@ -14,7 +14,16 @@
       "description": "Litmus — live-verify a defect/fix end-to-end in the real app (browser-MCP reproduce + fetch/XHR/scope/DB instrument) before marking it done. The definitive test that a fix is real.",
       "version": "1.0.0",
       "category": "testing",
-      "keywords": ["verify", "live-test", "reproduce", "litmus", "qa", "defect"]
+      "keywords": [
+        "verify",
+        "live-test",
+        "reproduce",
+        "litmus",
+        "qa",
+        "defect"
+      ],
+      "license": "MIT"
     }
-  ]
+  ],
+  "license": "MIT"
 }
