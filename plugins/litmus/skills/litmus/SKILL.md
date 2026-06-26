@@ -1,5 +1,5 @@
 ---
-name: live-verify
+name: litmus
 description: >
   Live-verify a NEB defect/fix end-to-end before marking it "Ready to test" — the mandatory
   workflow (Rawi's rule): reproduce the ticket's test steps in the REAL UI via Chrome MCP as the

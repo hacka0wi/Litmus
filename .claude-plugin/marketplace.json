@@ -1,21 +1,21 @@
 {
-  "name": "neb-tools",
+  "name": "saga",
   "owner": {
-    "name": "NEB-E2E",
+    "name": "Saga (NEB-E2E)",
     "email": "avalantclaudeai@gmail.com"
   },
   "metadata": {
-    "description": "NEB e-Budgeting team tools for Claude Code — defect verification & DB workflows.",
+    "description": "Saga — NEB e-Budgeting tools for Claude Code: defect verification & DB workflows.",
     "version": "1.0.0"
   },
   "plugins": [
     {
-      "name": "neb-live-verify",
-      "source": "./plugins/neb-live-verify",
-      "description": "Live-verify a NEB defect/fix end-to-end (Chrome MCP reproduce + network/scope/DB instrument) before marking Ready to test.",
+      "name": "litmus",
+      "source": "./plugins/litmus",
+      "description": "Litmus — live-verify a NEB defect/fix end-to-end (Chrome MCP reproduce + fetch/XHR/scope/Oracle-relay instrument) before marking Ready to test. The definitive test that a fix is real.",
       "version": "1.0.0",
       "category": "testing",
-      "keywords": ["verify", "live-test", "reproduce", "neb", "chrome-mcp", "defect"]
+      "keywords": ["verify", "live-test", "reproduce", "litmus", "neb", "chrome-mcp", "defect"]
     }
   ]
 }
