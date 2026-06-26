@@ -1,0 +1,21 @@
+{
+  "name": "neb-tools",
+  "owner": {
+    "name": "NEB-E2E",
+    "email": "avalantclaudeai@gmail.com"
+  },
+  "metadata": {
+    "description": "NEB e-Budgeting team tools for Claude Code — defect verification & DB workflows.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "neb-live-verify",
+      "source": "./plugins/neb-live-verify",
+      "description": "Live-verify a NEB defect/fix end-to-end (Chrome MCP reproduce + network/scope/DB instrument) before marking Ready to test.",
+      "version": "1.0.0",
+      "category": "testing",
+      "keywords": ["verify", "live-test", "reproduce", "neb", "chrome-mcp", "defect"]
+    }
+  ]
+}
